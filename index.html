@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <script src='https://d3js.org/d3.v5.min.js'></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap');
+
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+        h1 {
+            font-size: 64pt;
+            font-weight: 400;
+            text-align: center;
+        }
+        svg {
+            display: block;
+            margin: auto;
+        }
+    </style>
+</head>
+<body onload="init()">
+    <div id="article">
+        <h1>150,000 Lost and Counting</h1>
+        <div id="dataviz-1">
+
+        </div>
+    </div>
+</body>
+<script>
+    async function init() {
+        data = await d3.csv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us.csv")
+
+        var margin = {top: 50, right: 50, bottom: 50, left: 50},
+        width = 1200 - margin.left - margin.right,
+        height = 1200 - margin.top - margin.bottom;
+
+        var svg = d3.select("#dataviz-1")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        var lastDate = data.pop().date
+        var x = d3.scaleTime().domain([new Date("2020-01-21"), new Date(lastDate)]).range([0, width]);
+        var y = d3.scaleLinear().domain([200000,0]).range([height,0]);
+
+        // inverted bar chart
+        svg.selectAll("rect")
+        .data(data)
+        .enter()
+        .append("rect")
+        .attr("x", function (d,i) {return x(new Date(d.date));})
+        .attr("width", 2)
+        .attr("height", function (d,i) {return y(0);})
+        // .attr("height", function (d,i) {return y(d.deaths);})
+
+        xaxis = d3.axisTop(x)
+                .tickFormat(d3.timeFormat("%B"));
+        yaxis = d3.axisLeft(y).tickValues([0,50000,100000,150000,200000])
+                .tickFormat(d3.format("~s"))
+        y2axis = d3.axisRight(y).tickValues([0,50000,100000,150000,200000])
+                .tickFormat(d3.format("~s"));
+
+
+        svg = d3.select("svg");
+        
+        // d3.select("svg").append("g")
+        // .attr("transform", "translate("+margin.left+","+margin.top+")")
+        // .call(yaxis);
+        
+        svg.append("g")
+        .attr("transform", "translate("+(width+margin.left)+","+margin.top+")")
+        .call(y2axis);
+
+        svg.append("g")
+        .attr("transform", "translate("+margin.left+","+margin.top+")")
+        .call(xaxis);
+
+        // animation
+        svg.selectAll("rect")
+        .transition()
+        .duration(1800)
+        .attr("y", function(d) { return y(d.Value); })
+        .attr("height", function(d) { return y(d.deaths); })
+    }
+</script>
+</html>
