@@ -3,6 +3,7 @@
 <html>
 <head>
     <script src='https://d3js.org/d3.v5.min.js'></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-annotation/2.5.1/d3-annotation.min.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap');
@@ -19,13 +20,35 @@
             display: block;
             margin: auto;
         }
+        .bars rect {
+            fill: lightgrey;
+        }
+        .bars rect:last-child {
+            fill: red;
+        }
+        .bars rect:hover {
+            fill: black;
+        }
+
+        div.tooltip {	
+            position: absolute;			
+            text-align: left;	
+            width: 190px;					
+            height: 110px;					
+            padding: 10px;				
+            font: 18px;		
+            background: white;
+            border: 1px;				
+            pointer-events: none;			
+        }
     </style>
 </head>
 <body onload="init()">
     <div id="article">
-        <h1>150,000 Lost and Counting</h1>
+        
+        <button onclick="bubbleChart()">Next</button>
         <div id="dataviz-1">
-
+            <h1>150,000 Lost and Counting</h1>
         </div>
     </div>
 </body>
@@ -35,18 +58,25 @@
 
         var margin = {top: 50, right: 50, bottom: 50, left: 50},
         width = 1200 - margin.left - margin.right,
-        height = 1200 - margin.top - margin.bottom;
+        height = 800 - margin.top - margin.bottom;
 
         var svg = d3.select("#dataviz-1")
             .append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
             .append("g")
+            .classed("bars", true)
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
         var lastDate = data.pop().date
         var x = d3.scaleTime().domain([new Date("2020-01-21"), new Date(lastDate)]).range([0, width]);
         var y = d3.scaleLinear().domain([200000,0]).range([height,0]);
+
+        // define the div for the tooltip
+        var div = d3.select("body").append("div")	
+            .attr("class", "tooltip")				
+            .style("opacity", 0);
+
 
         // inverted bar chart
         svg.selectAll("rect")
@@ -54,16 +84,23 @@
         .enter()
         .append("rect")
         .attr("x", function (d,i) {return x(new Date(d.date));})
-        .attr("width", 2)
+        .attr("width", 5)
         .attr("height", function (d,i) {return y(0);})
         // .attr("height", function (d,i) {return y(d.deaths);})
+        .on("mouseover", function(d) {		
+            div.transition().duration(10).style("opacity", .7);		
+            div.html("<p>Date:  " +d.date + "</p>" + "<p>Total Deaths:  " + d.deaths + "</p>")	
+                .style("left", (d3.event.pageX) - 190 + "px")		
+                .style("top", (d3.event.pageY - 10) + "px");	
+            })					
+        .on("mouseout", function(d) {		
+            div.transition().duration(100).style("opacity", 0);	
+        });
 
-        xaxis = d3.axisTop(x)
-                .tickFormat(d3.timeFormat("%B"));
-        yaxis = d3.axisLeft(y).tickValues([0,50000,100000,150000,200000])
-                .tickFormat(d3.format("~s"))
-        y2axis = d3.axisRight(y).tickValues([0,50000,100000,150000,200000])
-                .tickFormat(d3.format("~s"));
+
+        xaxis = d3.axisTop(x).tickFormat(d3.timeFormat("%B"));
+        yaxis = d3.axisLeft(y).tickValues([0,50000,100000,150000,200000]).tickFormat(d3.format("~s"))
+        y2axis = d3.axisRight(y).tickValues([0,50000,100000,150000,200000]).tickFormat(d3.format("~s"));
 
 
         svg = d3.select("svg");
@@ -83,9 +120,148 @@
         // animation
         svg.selectAll("rect")
         .transition()
-        .duration(1800)
+        .duration(800)
         .attr("y", function(d) { return y(d.Value); })
         .attr("height", function(d) { return y(d.deaths); })
+
+
+        // annotate bar chart
+        const annotations = [
+            {
+                note: {
+                    label: "140,904",
+                    bgPadding: 20,
+                    title: "Deaths:"
+                },
+                x: 1145,
+                y: 550,
+                dy: 30,
+                dx: -30
+            }
+        ]
+
+        // Add annotation to the chart
+        const makeAnnotations = d3.annotation().annotations(annotations)
+
+        svg.append("g").call(makeAnnotations);
+    }
+
+    function bubbleChart() {
+        d3.select("#dataviz-1").html("");
+
+        var margin = {top: 0, right: 0, bottom: 0, left: 0},
+        width = window.innerWidth - margin.left - margin.right,
+        height = window.innerHeight - margin.top - margin.bottom;
+
+        data = new Array(1).fill({"name": "covid", "deaths": 1});
+        data = {"children": data}
+
+        var diameter = window.innerWidth * 2;
+        var svg = d3.select("#dataviz-1")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .classed("bubble", true)
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        
+        
+        var bubble = d3.pack(data)
+            .size([width, height])
+            .padding(3);
+
+        redraw(data);
+
+        function redraw(data) {
+            // transition
+            var t = d3.transition()
+                .duration(750);
+
+            // hierarchy
+            var nodes = d3.hierarchy(data)
+                .sum(function(d) { return d.deaths; });
+
+            // join
+            var node = svg.selectAll("circle")
+                // .data(bubble(nodes).descendants());
+                .data(bubble(nodes).leaves())
+
+            // update
+            node.transition(t)
+                .style("fill", "#3a403d")
+                .attr("r", function(d){ return d.r })
+                .attr("cx", function(d){ return d.x; })
+                .attr("cy", function(d){ return d.y; })
+
+
+            // exit
+            node.exit()
+                .style("fill", "#b26745")
+                .transition(t)
+                .attr("r", 1e-6)
+                .remove();
+
+            // enter
+            node.enter().append("circle")
+                .attr("r", 1e-6)
+                .attr("cx", function(d){ return d.x; })
+                .attr("cy", function(d){ return d.y; })
+                .style("fill", "#fff")
+                .transition(t)
+                .style("fill", "#45b29d")
+                .attr("r", function(d){ return d.r });
+        }
+
+
+        // node.append("title")
+        //     .text(function(d) {
+        //         return d.name + ": " + d.deaths;
+        //     });
+
+        // node.append("circle")
+        //     .style("fill", function(d,i) {
+        //             return "lightgray";
+        //         })
+        //     .transition()
+        //     .duration(800)
+        //     .attr("r", function(d) {
+        //         return d.r;
+        //     });
+
+        // update number of nodes
+        // data = new Array(1000).fill({"name": "covid", "deaths": 1});
+        // data = {"children": data} 
+
+        // nodes = d3.hierarchy(data)
+        //     .sum(function(d) { return d.deaths; });
+
+        // node = svg.selectAll(".node")
+        //     .data(bubble(nodes).descendants())
+        //     .enter()
+        //     .filter(function(d){
+        //         return !d.children
+        //     })
+        //     .append("g")
+        //     .attr("class", "node")
+        //     .attr("transform", function(d) {
+        //         return "translate(" + d.x + "," + d.y + ")";
+        //     });
+
+        // node.append("title")
+        //     .text(function(d) {
+        //         return d.name + ": " + d.deaths;
+        //     });
+
+        // node.append("circle")
+        //     .style("fill", function(d,i) {
+        //             return "lightgray";
+        //         })
+        //     .transition()
+        //     .duration(800)
+        //     .attr("r", function(d) {
+        //         return d.r;
+        //     });
+
     }
 </script>
 </html>
