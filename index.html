@@ -12,6 +12,12 @@
         body {
             font-family: 'Roboto', sans-serif;
         }
+        body.dots {
+            background-image: radial-gradient(lightcoral 20%, transparent 20%),
+                radial-gradient(lightcoral 20%, transparent 20%);
+            background-position: 0 0, 10px 10px;
+            background-size: 20px 20px;
+        }
         h1 {
             font-family: 'Libre Baskerville', serif;
             font-size: 36pt;
@@ -34,8 +40,8 @@
         div.tooltip {	
             position: absolute;			
             text-align: left;	
-            width: 190px;					
-            height: 110px;					
+            width: 160px;					
+            height: 90px;					
             padding: 10px;				
             font: 18px;		
             background: white;
@@ -51,10 +57,10 @@
         <h1>150,000 Lost and Counting</h1>
         <div id="article">
             <p>
-                As the coronavirus outbreak spreads in the United States, the death toll continues to climb. The growing number of deaths are clearly communicated in newspapers nationwide with charts similar to the one presented here. While this bar chart is effective at displaying the total number of deaths it's easy to forget the magnitude of the number of lives we have lost so far.
+                As the coronavirus outbreak spreads in the United States, the death toll continues to climb. While the growing number of deaths are clearly communicated with figures and charts similar to the one displayed here, it's easy to forget the magnitude of the number of lives we've lost and the impact each death had on close friends and family. This is an attempt to bring those themes to the forefront.
             </p>
         </div>
-        <div id="dataviz-1">   </div>
+        <div id="dataviz-1"></div>
     </div>
 </body>
 <script>
@@ -102,7 +108,7 @@
         // .attr("height", function (d,i) {return y(d.deaths);})
         .on("mouseover", function(d) {		
             div.transition().duration(10).style("opacity", .7);		
-            div.html("<p>Date:  " +d.date + "</p>" + "<p>Total Deaths:  " + d.deaths + "</p>")	
+            div.html("<p class='date'>" +d.date + "</p>" + "<p>Total Deaths:  " + d.deaths + "</p>")	
                 .style("left", (d3.event.pageX) - 190 + "px")		
                 .style("top", (d3.event.pageY - 10) + "px");	
             })					
@@ -142,7 +148,7 @@
                 title: "Deaths"
             },
             x: x(lastDate) + margin.left - 3,
-            y: y(143167) + margin.top + 7,
+            y: y(lastObject.deaths) + margin.top + 3,
             dy: 20,
             dx: -30
         }]
@@ -169,12 +175,18 @@
                 .append("g")
                 .classed("bubble", true)
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-            
+
+            var data = new Array(deaths).fill(
+                {"name": "Carl Redd, 62, Chicago", 
+                "moment": "Squeezed in every moment he could with his only grandchild", 
+                "deaths": 1}
+            );
+           
         } else {
             var svg = d3.select("svg").select("g");
+            var data = new Array(deaths).fill({"name": "covid", "moment": "human", "deaths": 1})
         }
 
-        data = new Array(deaths).fill({"name": "covid", "deaths": 1});
         data = {"children": data}
 
         var bubble = d3.pack(data)
@@ -208,12 +220,17 @@
             var node = svg.selectAll("circle")
                 .data(bubble(nodes).leaves());
 
+            var text = svg.selectAll("text")
+                .data(bubble(nodes).leaves(), function(d) { return d.name; });
+
             // update
             node.transition(t)
                 .style("fill", "black")
                 .attr("r", function(d){ return d.r })
                 .attr("cx", function(d){ return d.x; })
                 .attr("cy", function(d){ return d.y; })
+
+            text.remove();
 
             // exit
             node.exit()
@@ -222,12 +239,68 @@
                 .attr("r", 1e-6)
                 .remove();
 
+            text.exit().remove();
+
             // enter
             node.enter().append("circle")
                 .style("fill", "lightcoral")
                 .attr("r", function(d){ return d.r })
                 .attr("cx", function(d){ return d.x; })
-                .attr("cy", function(d){ return d.y; });   
+                .attr("cy", function(d){ return d.y; });
+
+            var annotations = [{
+                note: {
+                    label: 14000,
+                    bgPadding: 20,
+                    title: "Deaths"
+                },
+                x: width / 4,
+                y: 80,
+                dy: -20,
+                dx: -30
+            }];
+
+            if (deaths == 1) {
+                text.enter().append("text")
+                    .attr("dy", ".2em")
+                    .attr("opacity", 1e-6)
+                    .style("text-anchor", "middle")
+                    .style("font-size", "36px")
+                    .style("font-family", "Libre Baskerville, serif")
+                    .style("fill", "white")
+                    .attr("x", function(d){ return d.x; })
+                    .attr("y", function(d){ return d.y; })
+                    .text(function(d){ return d.data.name; })
+                    .transition(t)
+                    .attr("opacity", 1);
+
+                text.enter().append("text")
+                    .attr("dy", "2.0em")
+                    .attr("opacity", 1e-6)
+                    .style("text-anchor", "middle")
+                    .style("fill", "white")
+                    .attr("x", function(d){ return d.x; })
+                    .attr("y", function(d){ return d.y; })
+                    .text(function(d){ return d.data.moment; })
+                    .transition(t)
+                    .attr("opacity", 1);
+
+                annotations = [{
+                    note: {
+                        label: 1,
+                        bgPadding: 20,
+                        title: "Deaths"
+                    },
+                    x: width / 4,
+                    y: 80,
+                    dy: -20,
+                    dx: -30
+                }]
+            }
+
+            // Add annotation to the chart
+            var makeAnnotations = d3.annotation().annotations(annotations)
+            svg.append("g").call(makeAnnotations);
         }
     }
 </script>
