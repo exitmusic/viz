@@ -7,13 +7,14 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville&display=swap');
 
         body {
             font-family: 'Roboto', sans-serif;
         }
         h1 {
-            font-size: 64pt;
-            font-weight: 400;
+            font-family: 'Libre Baskerville', serif;
+            font-size: 36pt;
             text-align: center;
         }
         svg {
@@ -24,7 +25,7 @@
             fill: lightgrey;
         }
         .bars rect:last-child {
-            fill: red;
+            fill: lightcoral;
         }
         .bars rect:hover {
             fill: black;
@@ -46,10 +47,14 @@
 <body onload="init()">
     <div id="article">
         
-        <button onclick="bubbleChart()">Next</button>
-        <div id="dataviz-1">
-            <h1>150,000 Lost and Counting</h1>
+        <button onclick="bubbleChart(1)">Next</button>
+        <h1>150,000 Lost and Counting</h1>
+        <div id="article">
+            <p>
+                As the coronavirus outbreak spreads in the United States, the death toll continues to climb. The growing number of deaths are clearly communicated in newspapers nationwide with charts similar to the one presented here. While this bar chart is effective at displaying the total number of deaths it's easy to forget the magnitude of the number of lives we have lost so far.
+            </p>
         </div>
+        <div id="dataviz-1">   </div>
     </div>
 </body>
 <script>
@@ -57,8 +62,8 @@
         data = await d3.csv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us.csv")
 
         var margin = {top: 50, right: 50, bottom: 50, left: 50},
-        width = 1200 - margin.left - margin.right,
-        height = 800 - margin.top - margin.bottom;
+            width = window.innerWidth - margin.left - margin.right,
+            height = window.innerHeight - margin.top - margin.bottom - 150;
 
         var svg = d3.select("#dataviz-1")
             .append("svg")
@@ -68,9 +73,17 @@
             .classed("bars", true)
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-        var lastDate = data.pop().date
-        var x = d3.scaleTime().domain([new Date("2020-01-21"), new Date(lastDate)]).range([0, width]);
-        var y = d3.scaleLinear().domain([200000,0]).range([height,0]);
+        var dataCopy = [...data];
+        var lastObject = dataCopy.pop();
+        var lastDate = new Date(lastObject.date);
+
+        var x = d3.scaleTime()
+            .domain([new Date("2020-01-21"), lastDate.setDate(lastDate.getDate() + 1)])
+            .range([0, width]);
+
+        var y = d3.scaleLinear()
+            .domain([0,200000])
+            .range([0,height]);
 
         // define the div for the tooltip
         var div = d3.select("body").append("div")	
@@ -105,10 +118,6 @@
 
         svg = d3.select("svg");
         
-        // d3.select("svg").append("g")
-        // .attr("transform", "translate("+margin.left+","+margin.top+")")
-        // .call(yaxis);
-        
         svg.append("g")
         .attr("transform", "translate("+(width+margin.left)+","+margin.top+")")
         .call(y2axis);
@@ -126,19 +135,17 @@
 
 
         // annotate bar chart
-        const annotations = [
-            {
-                note: {
-                    label: "140,904",
-                    bgPadding: 20,
-                    title: "Deaths:"
-                },
-                x: 1145,
-                y: 550,
-                dy: 30,
-                dx: -30
-            }
-        ]
+        const annotations = [{
+            note: {
+                label: lastObject.deaths,
+                bgPadding: 20,
+                title: "Deaths"
+            },
+            x: x(lastDate) + margin.left - 3,
+            y: y(143167) + margin.top + 7,
+            dy: 20,
+            dx: -30
+        }]
 
         // Add annotation to the chart
         const makeAnnotations = d3.annotation().annotations(annotations)
@@ -146,32 +153,47 @@
         svg.append("g").call(makeAnnotations);
     }
 
-    function bubbleChart() {
-        d3.select("#dataviz-1").html("");
-
+    function bubbleChart(deaths) {
         var margin = {top: 0, right: 0, bottom: 0, left: 0},
-        width = window.innerWidth - margin.left - margin.right,
-        height = window.innerHeight - margin.top - margin.bottom;
-        deaths = 1;
+            width = window.innerWidth - margin.left - margin.right,
+            height = window.innerHeight - margin.top - margin.bottom;
+        
+        if (deaths == 1) {
+            d3.select("#dataviz-1").html("");
+            d3.select("button").attr("onclick", "bubbleChart(14000)")
+
+            var svg = d3.select("#dataviz-1")
+                .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .classed("bubble", true)
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+            
+        } else {
+            var svg = d3.select("svg").select("g");
+        }
 
         data = new Array(deaths).fill({"name": "covid", "deaths": 1});
         data = {"children": data}
 
-        var diameter = window.innerWidth * 2;
-        var svg = d3.select("#dataviz-1")
-            .append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
-            .append("g")
-            .classed("bubble", true)
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-        
-        
         var bubble = d3.pack(data)
             .size([width, height])
             .padding(3);
 
         redraw(data);
+
+        // var interval = d3.interval(function(elapsed){
+        //     deaths = 140000 / 10;
+        //     data = new Array(deaths).fill({"name": "covid", "deaths": 1});
+        //     data = {"children": data};
+        //     redraw(data)
+
+        //     if (elapsed > 100) {
+        //         interval.stop();
+        //         return;
+        //     }
+        // }, 800);
 
         function redraw(data) {
             // transition
@@ -195,35 +217,18 @@
 
             // exit
             node.exit()
-                .style("fill", "lightgrey")
+                .style("fill", "lightcoral")
                 .transition(t)
                 .attr("r", 1e-6)
                 .remove();
 
             // enter
             node.enter().append("circle")
-                .style("fill", "lightgrey")
+                .style("fill", "lightcoral")
                 .attr("r", function(d){ return d.r })
                 .attr("cx", function(d){ return d.x; })
-                .attr("cy", function(d){ return d.y; });
-                
-            
+                .attr("cy", function(d){ return d.y; });   
         }
-
-        var interval = d3.interval(function(elapsed){
-            deaths = 10000;
-            data = new Array(deaths).fill({"name": "covid", "deaths": 1});
-            data = {"children": data};
-            redraw(data)
-
-            if (elapsed > 100) {
-                interval.stop();
-                return;
-            }
-        }, 800);
-
-
-
     }
 </script>
 </html>
