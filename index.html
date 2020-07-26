@@ -36,29 +36,52 @@
         .bars rect:hover {
             fill: black;
         }
-
+        #copy {
+            position: absolute;
+            margin: 150px 50px 0;
+            padding: 10px;
+            width: 20vw;
+            background-color: white;
+            opacity: 80%;
+        }
         div.tooltip {	
+            font-family: 'Libre Baskerville', serif;
             position: absolute;			
             text-align: left;	
-            width: 160px;					
-            height: 90px;					
-            padding: 10px;				
+            padding: 0 10px;				
             font: 18px;		
             background: white;
             border: 1px;				
             pointer-events: none;			
         }
+        #tooltip-header {
+            font-size: 12px;
+            margin: 0;
+        }
+        #tooltip-deaths {
+            font-weight: bold;
+            margin: 0;
+            padding: 0 0 10px;
+        }
+        #page2, #page3 {
+            display: none;
+        }
     </style>
 </head>
 <body onload="init()">
     <div id="article">
-        
-        <button onclick="bubbleChart(1)">Next</button>
         <h1>150,000 Lost and Counting</h1>
-        <div id="article">
-            <p>
+        <div id="copy">
+            <p id="page1">
                 As the coronavirus outbreak spreads in the United States, the death toll continues to climb. While the growing number of deaths are clearly communicated with figures and charts similar to the one displayed here, it's easy to forget the magnitude of the number of lives we've lost and the impact each death had on close friends and family. This is an attempt to bring those themes to the forefront.
             </p>
+            <p id="page2">
+                Text here, page 2
+            </p>
+            <p id="page3">
+                Text here, page 3
+            </p>
+            <button onclick="bubbleChart(1)">Next</button>
         </div>
         <div id="dataviz-1"></div>
     </div>
@@ -108,8 +131,10 @@
         // .attr("height", function (d,i) {return y(d.deaths);})
         .on("mouseover", function(d) {		
             div.transition().duration(10).style("opacity", .7);		
-            div.html("<p class='date'>" +d.date + "</p>" + "<p>Total Deaths:  " + d.deaths + "</p>")	
-                .style("left", (d3.event.pageX) - 190 + "px")		
+            div.html('<p id="tooltip-date">' +d.date + "</p>" + 
+                '<p id="tooltip-header">Total Deaths</p>' +
+                '<p id="tooltip-deaths">' + d.deaths + "</p>")	
+                .style("left", (d3.event.pageX) - 125 + "px")		
                 .style("top", (d3.event.pageY - 10) + "px");	
             })					
         .on("mouseout", function(d) {		
@@ -166,7 +191,9 @@
         
         if (deaths == 1) {
             d3.select("#dataviz-1").html("");
-            d3.select("button").attr("onclick", "bubbleChart(14000)")
+            d3.select("button").attr("onclick", "bubbleChart(14000)");
+            d3.select("#page1").style("display", "none");
+            d3.select("#page2").style("display", "block");
 
             var svg = d3.select("#dataviz-1")
                 .append("svg")
@@ -183,6 +210,9 @@
             );
            
         } else {
+            d3.select("#page2").style("display", "none");
+            d3.select("#page3").style("display", "block");
+            
             var svg = d3.select("svg").select("g");
             var data = new Array(deaths).fill({"name": "covid", "moment": "human", "deaths": 1})
         }
