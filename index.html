@@ -3,7 +3,6 @@
 <html>
 <head>
     <script src='https://d3js.org/d3.v5.min.js'></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-annotation/2.5.1/d3-annotation.min.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap');
@@ -13,19 +12,56 @@
             font-family: 'Roboto', sans-serif;
         }
         body.dots {
-            background-image: radial-gradient(lightcoral 20%, transparent 20%),
-                radial-gradient(lightcoral 20%, transparent 20%);
-            background-position: 0 0, 10px 10px;
-            background-size: 20px 20px;
+            background-image: radial-gradient(rgba(240, 128, 128, 0.5) 50%, transparent 40%);
+            background-color: white;
+            background-position: 50px 50px;
+            background-size: 7px 7px;
         }
         h1 {
             font-family: 'Libre Baskerville', serif;
             font-size: 36pt;
             text-align: center;
         }
+        p.story {
+            padding-bottom: 10px;
+        }
+        p.source {
+            font-size: 8pt;
+            color: grey;
+            margin: 0;
+        }
+        p.bio {
+            font-family: 'Libre Baskerville', serif;
+            font-size: 10pt;
+            color: grey;
+        }
+        p.bio span.name {
+            display: block;
+            color: black;
+        }
+        q {
+            color: grey;
+            font-family: 'Libre Baskerville', serif;
+            font-size: 11pt;
+        }
+        p.quote-source {
+            font-size: 11pt;
+            text-align: right;
+        }
+        button {
+            margin-top: 25px;
+        }
         svg {
             display: block;
             margin: auto;
+        }
+        svg text {
+            font-family: 'Libre Baskerville', serif;
+            font-size: 12pt;
+        }
+        svg text.annotation {
+            font-size: 11pt;
+            fill: grey;
         }
         .bars rect {
             fill: lightgrey;
@@ -39,10 +75,11 @@
         #copy {
             position: absolute;
             margin: 150px 50px 0;
-            padding: 10px;
+            padding: 20px;
             width: 20vw;
             background-color: white;
             opacity: 80%;
+            border: 2px solid lightgray;
         }
         div.tooltip {	
             font-family: 'Libre Baskerville', serif;
@@ -63,7 +100,7 @@
             margin: 0;
             padding: 0 0 10px;
         }
-        #page2, #page3 {
+        #page2, #page3, #page4 {
             display: none;
         }
     </style>
@@ -72,15 +109,74 @@
     <div id="article">
         <h1>150,000 Lost and Counting</h1>
         <div id="copy">
-            <p id="page1">
-                As the coronavirus outbreak spreads in the United States, the death toll continues to climb. While the growing number of deaths are clearly communicated with figures and charts similar to the one displayed here, it's easy to forget the magnitude of the number of lives we've lost and the impact each death had on close friends and family. This is an attempt to bring those themes to the forefront.
-            </p>
-            <p id="page2">
-                Text here, page 2
-            </p>
-            <p id="page3">
-                Text here, page 3
-            </p>
+            <div id="page1">
+                <p class="story">
+                    As the coronavirus outbreak spreads in the United States, the death toll continues to climb. While the growing number of deaths are clearly communicated with figures and charts similar to the one displayed here, it's imperfect and doesn't convey the impact of each individual death on loved ones.
+                </p>
+                <p class="story">
+                    This is an attempt to represent the magnitude of the lives lost from a different perspective.
+                </p>
+                <p class="source">
+                    Data from <a href="https://github.com/nytimes/covid-19-data">The New York Times COVID-19 data</a>
+                </p>
+                <p class="source">
+                    Inspired by a piece from The New York Times, <a href="https://www.nytimes.com/interactive/2020/05/24/us/us-coronavirus-deaths-100000.html">An Incalculable Loss</a>
+                </p>
+            </div>
+            <div id="page2">
+                <p class="story">
+                    Here is one circle representing a life lost to COVID-19. We get a glimpse into Carl's life with a brief memory pulled from his obituary. 
+                </p>
+                <q>
+                    But a count only reveals so much. Memories, gathered from obituaries across the country, help us to reckon with what was lost.
+                </q>
+                <p class="quote-source">
+                    <a href="https://www.nytimes.com/interactive/2020/05/24/us/us-coronavirus-deaths-100000.html">
+                        — The New York Times
+                    </a>
+                </p>
+            </div>
+            <div id="page3">
+                <p class="story">
+                    Here are 15,000 circles—each one representing a life lost. Carl Redd is represented by the one in the middle surrounded by thousands of other deaths.
+                </p>
+                <p class="story">
+                    These circles only depict 1/10 of the total 150,000 deaths (and counting).
+                </p>
+                <p class="bio">
+                    <span class="name">Jessica Beatriz Cortez, 32, Los Angeles</span>
+                    Immigrated to the United States three years ago.
+                </p>
+                <p class="bio">    
+                    <span class="name">Isreal Sauz, 22, Broken Arrow, Okla.</span>
+                    New father.
+                </p>
+                <p class="bio">
+                    <span class="name">Jennifer Robin Arnold, 67, New York City</span>
+                    Broadway costume designer.
+                </p>
+                <p class="bio">
+                    <span class="name">Azade Kilic, 69, New York</span>
+                    Two-time cancer survivor.
+                </p>
+                <p class="bio">
+                    <span class="name">Kimarlee Nguyen, 33, Everett, Mass.</span>
+                    Writer who inspired her Brooklyn high school students.
+                </p>
+            </div>
+            <div id="page4">
+                <p class="story">
+                    At this time (August 2020) cases and deaths continue to rise in the USA. Many more lives will be lost. 
+                </p>
+                <q>
+                    A number is an imperfect measure when applied to the human condition.
+                </q>
+                <p class="quote-source">
+                    <a href="https://www.nytimes.com/interactive/2020/05/24/us/us-coronavirus-deaths-100000.html">
+                        — The New York Times
+                    </a>
+                </p>
+            </div>
             <button onclick="bubbleChart(1)">Next</button>
         </div>
         <div id="dataviz-1"></div>
@@ -88,9 +184,16 @@
 </body>
 <script>
     async function init() {
+        d3.select("#dataviz-1").html("");
+        d3.select("#page1").style("display", "block");
+        d3.select("#page4").style("display", "none");
+        d3.select("body").classed("dots", false);
+        d3.select("button").attr("onclick", "bubbleChart(1)").html("Next");
+
+
         data = await d3.csv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us.csv")
 
-        var margin = {top: 50, right: 50, bottom: 50, left: 50},
+        var margin = {top: 50, right: 80, bottom: 50, left: 80},
             width = window.innerWidth - margin.left - margin.right,
             height = window.innerHeight - margin.top - margin.bottom - 150;
 
@@ -166,22 +269,53 @@
 
 
         // annotate bar chart
-        const annotations = [{
+        var annotationsBar = [{
+            note: {
+                label: "2020-02-29",
+                bgPadding: 20,
+                title: "First Death: "
+            },
+            x: x(new Date("2020-02-29")) + margin.left - 4,
+            y: y(1) + margin.top + 3,
+            dy: 20,
+            dx: -30,
+            labelxoffset: -120,
+            labelyoffset: 20
+        }, {
             note: {
                 label: lastObject.deaths,
                 bgPadding: 20,
-                title: "Deaths"
+                title: "Deaths: "
             },
-            x: x(lastDate) + margin.left - 3,
+            x: x(lastDate) + margin.left - 4,
             y: y(lastObject.deaths) + margin.top + 3,
             dy: 20,
-            dx: -30
-        }]
+            dx: -30,
+            labelxoffset: -120,
+            labelyoffset: 15
+        }];
 
-        // Add annotation to the chart
-        const makeAnnotations = d3.annotation().annotations(annotations)
+        annotate(svg, annotationsBar);
+    }
 
-        svg.append("g").call(makeAnnotations);
+    function annotate(svg, annotations) {
+        // clear previous annotations
+        svg.selectAll(".annotation").remove();
+
+        for (var annotation of annotations) {
+            svg.append("g").append("text")
+                .classed("annotation", true)
+                .html(annotation.note.title + annotation.note.label)
+                .attr("x", annotation.x + annotation.dx + annotation.labelxoffset)
+                .attr("y", annotation.y + annotation.dy + annotation.labelyoffset);
+            svg.append("line")
+                .classed("annotation", true)
+                .attr("x1", annotation.x)
+                .attr("y1", annotation.y)
+                .attr("x2", annotation.x + annotation.dx)
+                .attr("y2", annotation.y + annotation.dy)
+                .attr("stroke", "grey");
+        }
     }
 
     function bubbleChart(deaths) {
@@ -191,7 +325,7 @@
         
         if (deaths == 1) {
             d3.select("#dataviz-1").html("");
-            d3.select("button").attr("onclick", "bubbleChart(14000)");
+            d3.select("button").attr("onclick", "bubbleChart(15000)");
             d3.select("#page1").style("display", "none");
             d3.select("#page2").style("display", "block");
 
@@ -205,13 +339,14 @@
 
             var data = new Array(deaths).fill(
                 {"name": "Carl Redd, 62, Chicago", 
-                "moment": "Squeezed in every moment he could with his only grandchild", 
+                "moment": "Squeezed in every moment he could with his only grandchild.", 
                 "deaths": 1}
             );
            
         } else {
             d3.select("#page2").style("display", "none");
             d3.select("#page3").style("display", "block");
+            d3.select("button").attr("onclick", "dots()");
             
             var svg = d3.select("svg").select("g");
             var data = new Array(deaths).fill({"name": "covid", "moment": "human", "deaths": 1})
@@ -225,22 +360,10 @@
 
         redraw(data);
 
-        // var interval = d3.interval(function(elapsed){
-        //     deaths = 140000 / 10;
-        //     data = new Array(deaths).fill({"name": "covid", "deaths": 1});
-        //     data = {"children": data};
-        //     redraw(data)
-
-        //     if (elapsed > 100) {
-        //         interval.stop();
-        //         return;
-        //     }
-        // }, 800);
-
         function redraw(data) {
             // transition
             var t = d3.transition()
-                .duration(1050);
+                .duration(1200);
 
             // hierarchy
             var nodes = d3.hierarchy(data)
@@ -250,7 +373,8 @@
             var node = svg.selectAll("circle")
                 .data(bubble(nodes).leaves());
 
-            var text = svg.selectAll("text")
+            // only select text generated from the data array
+            var text = svg.selectAll("text.details")
                 .data(bubble(nodes).leaves(), function(d) { return d.name; });
 
             // update
@@ -278,20 +402,23 @@
                 .attr("cx", function(d){ return d.x; })
                 .attr("cy", function(d){ return d.y; });
 
-            var annotations = [{
+            var annotationsBubble = [{
                 note: {
-                    label: 14000,
+                    label: "15,000",
                     bgPadding: 20,
-                    title: "Deaths"
+                    title: "Deaths: "
                 },
-                x: width / 4,
-                y: 80,
+                x: width * 0.75,
+                y: height * 0.20,
                 dy: -20,
-                dx: -30
+                dx: 30,
+                labelxoffset: 5,
+                labelyoffset: -5
             }];
 
             if (deaths == 1) {
                 text.enter().append("text")
+                    .classed("details", true)
                     .attr("dy", ".2em")
                     .attr("opacity", 1e-6)
                     .style("text-anchor", "middle")
@@ -305,6 +432,7 @@
                     .attr("opacity", 1);
 
                 text.enter().append("text")
+                    .classed("details", true)
                     .attr("dy", "2.0em")
                     .attr("opacity", 1e-6)
                     .style("text-anchor", "middle")
@@ -315,23 +443,33 @@
                     .transition(t)
                     .attr("opacity", 1);
 
-                annotations = [{
+                annotationsBubble = [{
                     note: {
                         label: 1,
                         bgPadding: 20,
-                        title: "Deaths"
+                        title: "Deaths: "
                     },
-                    x: width / 4,
-                    y: 80,
+                    x: width * 0.75,
+                    y: height * 0.20,
                     dy: -20,
-                    dx: -30
-                }]
+                    dx: 30,
+                    labelxoffset: 5,
+                    labelyoffset: -5
+                }];
             }
 
             // Add annotation to the chart
-            var makeAnnotations = d3.annotation().annotations(annotations)
-            svg.append("g").call(makeAnnotations);
+            annotate(svg, annotationsBubble);
+            
         }
+    }
+
+    function dots() {
+        d3.select("#dataviz-1").html("");
+        d3.select("#page3").style("display", "none");
+        d3.select("#page4").style("display", "block");
+        d3.select("body").classed("dots", true);
+        d3.select("button").attr("onclick", "init()").html("Start Over");
     }
 </script>
 </html>
